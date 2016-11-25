@@ -1,16 +1,25 @@
 package com.cnnp.social.onDuty.manager;
 
+import com.cnnp.social.base.NoContentException;
+import com.cnnp.social.base.SocialSystemException;
 import com.cnnp.social.onDuty.manager.dto.DutyDto;
 import com.cnnp.social.onDuty.manager.dto.DutyQueryDto;
 import com.cnnp.social.onDuty.repository.dao.OnDutyDao;
 import com.cnnp.social.onDuty.repository.dao.OnDutyImportDao;
-import com.cnnp.social.onDuty.repository.dao.OnDutyUserDao;
 import com.cnnp.social.onDuty.repository.entity.TDuty;
+import com.cnnp.social.onDuty.repository.entity.TDutyImport;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.time.DateUtils;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.dozer.DozerBeanMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -18,27 +27,31 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import javax.persistence.criteria.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 @EnableTransactionManagement
 @Component
 
 public class OnDutyManager {
+	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
 	@Autowired
 	private OnDutyDao  onDutyDao;
-	
+
 	@Autowired
-	private OnDutyImportDao  onDutyImportDao;
-	
-	@Autowired
-	private OnDutyUserDao  onDutyUserDao;
+	private OnDutyImportDao onDutyImportDao;
+
+
 	private DozerBeanMapper mapper = new DozerBeanMapper();
 	
 	private Workbook wb;  
@@ -93,6 +106,54 @@ public class OnDutyManager {
 		return availableDuties;
 	}
 
+	public DutyDto saveOrUpdate(DutyDto duty){
+		if(duty==null){
+			throw new NoContentException(310); //No Content Exception
+		}
+		TDuty entity=new TDuty();
+		mapper.map(duty,entity);
+		entity.setUpdateTime(new Date());//更新时间
+		entity=onDutyDao.save(entity);
+		if(entity==null){
+			throw new SocialSystemException(311);//Save Exception
+		}
+		DutyDto newDuty=new DutyDto();
+		mapper.map(entity,newDuty);
+		return newDuty;
+	}
+
+	/**
+	 * 删除值班信息
+	 * @param id 值班ID
+	 */
+	public void delete(String id){
+		if(StringUtils.isEmpty(id)){
+			throw new IllegalArgumentException("bad request parameter");
+		}
+		TDuty duty=onDutyDao.findOne(id);
+		if(duty==null){
+			throw new NoContentException(310); //No Content Exception
+		}
+		onDutyDao.delete(duty);
+	}
+
+	/**
+	 * 查看值班详情
+	 * @param id 值班信息ID
+	 * @return DutyDto
+	 */
+	public DutyDto find(String id){
+		if(StringUtils.isEmpty(id)){
+			throw new IllegalArgumentException("bad request parameter");
+		}
+		TDuty duty=onDutyDao.findOne(id);
+		if(duty==null){
+			throw new NoContentException(310); //No Content Exception
+		}
+		DutyDto dutyDto=new DutyDto();
+		mapper.map(duty,dutyDto);
+		return dutyDto;
+	}
 //
 //	@Transactional
 //	public DutyStatus addDuty(DutyDto dutyDto) throws ParseException{
@@ -336,44 +397,161 @@ public class OnDutyManager {
 //		return status;
 //	}
 //
-//	public List<DutyImportDto> readExcel(MultipartFile file,String suffix) throws Exception{
-//		List<DutyImportDto> contentList = new ArrayList<DutyImportDto>();
-//		try {
-//			InputStream is = file.getInputStream();
-//			if(".xls".equals(suffix)){
-//                wb = new HSSFWorkbook(is);
-//            }else if(".xlsx".equals(suffix)){
-//                wb = new XSSFWorkbook(is);
-//            }
-//			contentList = readExcelContent(wb);
-//		} catch (IOException e) {
-//			e.printStackTrace();
-//		}
-//		return contentList;
-//	}
+	public void importData(InputStream is,String filename){
+		try {
+			String suffix=StringUtils.substringAfterLast(filename,".");
+			if(StringUtils.isNoneBlank(filename) ||
+					filename.equalsIgnoreCase("xlsx")){
+				wb = new XSSFWorkbook(is);
+			}else{
+				wb = new HSSFWorkbook(is);
+			}
+			List<TDutyImport> duties = readExcelContent(wb);
+			if(duties == null || CollectionUtils.isEmpty(duties)){
+				throw new NoContentException(310);
+			}
+			for(TDutyImport duty : duties){
+				onDutyImportDao.save(duty);
+			}
+
+		} catch (IOException e) {
+			throw new SocialSystemException(312,filename);
+		} catch (RuntimeException e){
+			throw new SocialSystemException(311);
+		}
+	}
 //
-//	public List<DutyImportDto> readExcelContent(Workbook wb) throws Exception{
-//		List<DutyImportDto> contentList = new ArrayList<DutyImportDto>();
-//		DutyImportDto contentDto = new DutyImportDto();
-//        sheet = wb.getSheetAt(0);
-//        // get all rows
-//        int rowNum = sheet.getLastRowNum();
-//        // get the content, title is the first row
-//        for (int i = 1; i <= rowNum; i++) {
-//            row = sheet.getRow(i);
-//            contentDto.setUserid((long) row.getCell(0).getNumericCellValue());
-//            contentDto.setUsername(row.getCell(1).getStringCellValue());
-//            contentDto.setResponsibledepartment(row.getCell(2).toString());
-//            contentDto.setCompanyid(row.getCell(3).toString());
-//            contentDto.setStartdate(row.getCell(4).toString());
-//            contentDto.setEnddate(row.getCell(5).toString());
-//            contentDto.setDescription(row.getCell(6).getStringCellValue());
-//            contentDto.setCreateusername(row.getCell(7).getStringCellValue());
-//            contentDto.setCreateuserid((long) row.getCell(8).getNumericCellValue());
-//            contentList.add(contentDto);
-//        }
-//        return contentList;
-//    }
+	private boolean validateSheet(Workbook wb){
+		if(wb==null){
+			logger.error("xls or xlsx has no sheet");
+			return false;
+		}
+		Sheet sheet=wb.getSheetAt(0);
+		if(sheet == null){
+			logger.error("xls or xlsx has no sheet");
+			return false;
+		}
+
+		int rowNum=sheet.getLastRowNum();
+		if(rowNum < 4){
+			logger.error("content sheet is empty");
+			return false;
+		}
+
+		Cell companyField =sheet.getRow(1).getCell(7);
+		if(companyField == null){
+			logger.error("所属公司为必填字段，请选择所属公司后重新导入");
+			return false;
+		}
+
+
+		Cell batchnoField=sheet.getRow(1).getCell(5);
+		if(batchnoField == null ||
+				!batchnoField.getStringCellValue().contains("B-") ||
+				batchnoField.getStringCellValue().length()!=8 ){
+			logger.error("导入批次号为必填字段，并且格式为<B- + 6位数字>");
+			return false;
+		}
+		return true;
+	}
+
+	private  boolean validateRow(Row row){
+		if(StringUtils.isBlank(row.getCell(0).getStringCellValue()) ||
+				!StringUtils.isNumeric(row.getCell(0).getStringCellValue())){
+			logger.error("序号不能为空，且必须为数字");
+			return false;
+		}
+		if(StringUtils.isBlank(row.getCell(1).getStringCellValue())){
+			logger.error("员工号不能为空");
+			return false;
+		}
+		if(StringUtils.isBlank(row.getCell(3).getStringCellValue()) ||
+				!StringUtils.isNumeric(row.getCell(3).getStringCellValue())){
+			logger.error("部门编号不能为空，且必须为数字");
+			return false;
+		}
+		if(StringUtils.isBlank(row.getCell(5).getStringCellValue()) ||
+				!isDate(row.getCell(5).getStringCellValue())){
+			logger.error("开始日期不能为空,且格式为YYYY-MM-DD");
+			return false;
+		}
+		if(StringUtils.isBlank(row.getCell(6).getStringCellValue()) ||
+				!isDate(row.getCell(6).getStringCellValue())){
+			logger.error("结束日期不能为空,且格式为YYYY-MM-DD");
+			return false;
+		}
+
+		return true;
+	}
+	private boolean isDate(String date)
+	{
+		/**
+		 * 判断日期格式和范围
+		 */
+		String rexp = "^((\\d{2}(([02468][048])|([13579][26]))[\\-\\/\\s]?((((0?[13578])|(1[02]))" +
+				"[\\-\\/\\s]?((0?[1-9])|([1-2][0-9])|(3[01])))|(((0?[469])|(11))[\\-\\/\\s]?(" +
+				"(0?[1-9])|([1-2][0-9])|(30)))|(0?2[\\-\\/\\s]?((0?[1-9])|([1-2][0-9])))))|(\\d{2}("+
+				"([02468][1235679])|([13579][01345789]))[\\-\\/\\s]?((((0?[13578])|(1[02]))" +
+				"[\\-\\/\\s]?((0?[1-9])|([1-2][0-9])|(3[01])))|(((0?[469])|(11))[\\-\\/\\s]?(" +
+				"(0?[1-9])|([1-2][0-9])|(30)))|(0?2[\\-\\/\\s]?((0?[1-9])|(1[0-9])|(2[0-8]))))))";
+
+		Pattern pat = Pattern.compile(rexp);
+
+		Matcher mat = pat.matcher(date);
+
+		boolean dateType = mat.matches();
+
+		return dateType;
+	}
+	public List<TDutyImport> readExcelContent(Workbook wb){
+		if(!validateSheet(wb)){
+			return null;
+		}
+		Sheet sheet=wb.getSheetAt(0);
+		int rowNum=sheet.getLastRowNum();
+		Cell companyField =sheet.getRow(1).getCell(7);
+		Cell batchnoField=sheet.getRow(1).getCell(5);
+
+		String companyFieldValue=companyField.getStringCellValue();
+		String companyCode=StringUtils.substringBefore(companyFieldValue,"-"); //公司编号
+		String companyName=StringUtils.substringAfter(companyFieldValue,"-"); //公司名称
+		String batchno=batchnoField.getStringCellValue(); //批次号
+
+		List<TDutyImport> list=new ArrayList<TDutyImport>();
+		for (int i = 4; i <= rowNum; i++) {
+			Row row=sheet.getRow(i);
+			if(!validateRow(row)){ //校验失败
+				continue;
+			}
+			TDutyImport dutyImport=new TDutyImport();
+			dutyImport.setBatchno(batchno);
+			dutyImport.setCompanycode(companyCode);
+			dutyImport.setCompanyName(companyName);
+			dutyImport.setSeqno(Integer.valueOf(row.getCell(0).getStringCellValue()));//序号
+			dutyImport.setImporttime(new Date());
+
+			dutyImport.setDuty(new TDuty());
+			dutyImport.getDuty().setCompanyCode(companyCode);
+			dutyImport.getDuty().setCompanyName(companyName);
+			dutyImport.getDuty().setCaretaker(row.getCell(1).getStringCellValue());
+			dutyImport.getDuty().setCaretakerName(row.getCell(2).getStringCellValue());
+			dutyImport.getDuty().setDepartmentCode(row.getCell(3).getStringCellValue());
+			dutyImport.getDuty().setDepartmentName(row.getCell(4).getStringCellValue());
+			dutyImport.getDuty().setUpdateTime(new Date());
+			try{
+				dutyImport.getDuty().setStartDate(DateUtils.parseDate(
+						row.getCell(5).getStringCellValue(),"yyyy-MM-dd"));
+				dutyImport.getDuty().setEndDate(DateUtils.parseDate(
+						row.getCell(6).getStringCellValue(),"yyyy-MM-dd"));
+			}
+			catch (ParseException exception){
+				logger.error(exception.getMessage());
+			}
+			dutyImport.getDuty().setStatus(2); //草稿
+			list.add(dutyImport);
+		}
+		return list;
+    }
 //
 //	public List<OnDutyDto> findByDuty(DutyDto duty ){
 //		StringBuffer sql = new StringBuffer("select id,createuserid,createusername,updatetime,responsibledepartment,companyid,description from DUTY where 1=1 ");

@@ -1,23 +1,15 @@
 package com.cnnp.social.onDuty.repository.entity;
 
-import java.util.Date;
-
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.persistence.Temporal;
-import javax.persistence.TemporalType;
-
 import org.dozer.Mapping;
+
+import javax.persistence.*;
+import java.util.Date;
 
 /**
  * The persistent class for the HP_ADMIN database table.
  * 
  */
-@Entity
-@Table(name = "DUTYPEOPLE")
+
 public class TDutyUser{
 	
 	

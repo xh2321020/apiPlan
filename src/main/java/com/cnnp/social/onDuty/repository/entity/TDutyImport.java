@@ -1,74 +1,90 @@
 package com.cnnp.social.onDuty.repository.entity;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import org.hibernate.annotations.GenericGenerator;
+
+import javax.persistence.*;
+import java.util.Date;
 
 @Entity
-@Table(name = "DUTYIMPORT")
+@Table(name = "T_DUTY_IMP")
 public class TDutyImport {
-	
 	@Id
-	@GeneratedValue(strategy = GenerationType.AUTO)
-	private long id; // ID 
-	private long userid; // 用户ID
-	private String username; // 用户姓名
-	private String responsibledepartment;// 部门
-	private String companyid;// 公司	
-	private String description;// 备注
-	private String startdate;// 开始时间	
-	private String enddate;// 结束时间
-	
-	
-	public long getId() {
+	@GenericGenerator(name="idGenerator", strategy="uuid")
+	@GeneratedValue(generator="idGenerator")
+	private String id;
+	private int seqno;
+
+	private String batchno;
+	private String companycode;
+	private String companyName;
+	private String log;
+	private Date importtime;
+
+	@OneToOne(cascade ={CascadeType.ALL})
+	@JoinColumn(name="duty_id")
+	private TDuty duty;
+
+	public String getId() {
 		return id;
 	}
-	public void setId(long id) {
+
+	public void setId(String id) {
 		this.id = id;
 	}
-	public long getUserid() {
-		return userid;
-	}
-	public void setUserid(long userid) {
-		this.userid = userid;
-	}
-	public String getUsername() {
-		return username;
-	}
-	public void setUsername(String username) {
-		this.username = username;
-	}
-	public String getResponsibledepartment() {
-		return responsibledepartment;
-	}
-	public void setResponsibledepartment(String responsibledepartment) {
-		this.responsibledepartment = responsibledepartment;
-	}
-	public String getCompanyid() {
-		return companyid;
-	}
-	public void setCompanyid(String companyid) {
-		this.companyid = companyid;
-	}
-	public String getDescription() {
-		return description;
-	}
-	public void setDescription(String description) {
-		this.description = description;
-	}
-	public String getStartdate() {
-		return startdate;
-	}
-	public void setStartdate(String startdate) {
-		this.startdate = startdate;
-	}
-	public String getEnddate() {
-		return enddate;
-	}
-	public void setEnddate(String enddate) {
-		this.enddate = enddate;
+
+	public int getSeqno() {
+		return seqno;
 	}
 
+	public void setSeqno(int seqno) {
+		this.seqno = seqno;
+	}
+
+	public String getBatchno() {
+		return batchno;
+	}
+
+	public void setBatchno(String batchno) {
+		this.batchno = batchno;
+	}
+
+	public String getCompanycode() {
+		return companycode;
+	}
+
+	public void setCompanycode(String companycode) {
+		this.companycode = companycode;
+	}
+
+	public String getCompanyName() {
+		return companyName;
+	}
+
+	public void setCompanyName(String companyName) {
+		this.companyName = companyName;
+	}
+
+	public String getLog() {
+		return log;
+	}
+
+	public void setLog(String log) {
+		this.log = log;
+	}
+
+	public Date getImporttime() {
+		return importtime;
+	}
+
+	public void setImporttime(Date importtime) {
+		this.importtime = importtime;
+	}
+
+	public TDuty getDuty() {
+		return duty;
+	}
+
+	public void setDuty(TDuty duty) {
+		this.duty = duty;
+	}
 }

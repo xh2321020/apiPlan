@@ -11,7 +11,7 @@ import java.util.List;
 
 
 @Transactional
-public interface OnDutyDao extends CrudRepository<TDuty, Long> ,JpaSpecificationExecutor<TDuty>{
+public interface OnDutyDao extends CrudRepository<TDuty, String> ,JpaSpecificationExecutor<TDuty>{
 	
 	@Query("select max(cast(id as float)) from TDuty ")
 	public long findmaxid();
@@ -24,6 +24,7 @@ public interface OnDutyDao extends CrudRepository<TDuty, Long> ,JpaSpecification
 	
 	@Query("select duty from TDuty duty where duty.id = ?1")
 	public TDuty findByDutyId(Long id);
+
 
 
 }

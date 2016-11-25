@@ -1,14 +1,15 @@
 package com.cnnp.social.onDuty.service;
 
+import com.cnnp.social.base.SocialSystemException;
 import com.cnnp.social.onDuty.manager.OnDutyManager;
 import com.cnnp.social.onDuty.manager.dto.DutyDto;
 import com.cnnp.social.onDuty.manager.dto.DutyQueryDto;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
 @RestController
@@ -18,47 +19,42 @@ public class OnDutyController {
 	private OnDutyManager onDutyManger;
 
 	@RequestMapping(value = "/duties", method = RequestMethod.POST)
-	public List<DutyDto> findByDuty(@RequestBody DutyQueryDto duty) {
+	public @ResponseBody List<DutyDto> findByDuty(@RequestBody DutyQueryDto duty) {
 		return onDutyManger.findAvailableDuty(duty);
 	}
 
-//	@RequestMapping(value = "/onduty/add", method = RequestMethod.POST)
-//	public DutyStatus save(@RequestBody DutyDto onDutyDto) throws ParseException {
-//		DutyStatus status = onDutyManger.addDuty(onDutyDto);
-//		return status;
-//	}
-//
-//	@RequestMapping(value = "/onduty/delete", method = RequestMethod.POST)
-//	public Boolean del(@RequestParam Long dutyid) {
-//		return onDutyManger.delDuty(dutyid);
-//	}
-//
-//	@RequestMapping(value = "/onduty/findByUser", method = RequestMethod.POST)
-//	public List<OnDutyDto> findByUser(@RequestBody UserDto user) {
-//		return onDutyManger.findByUser(user);
-//	}
-//
-//	@RequestMapping(value = "/onduty/findbyDuty", method = RequestMethod.POST)
-//	public List<OnDutyDto> findByDuty(@RequestBody DutyDto duty) {
-//		return onDutyManger.findByDuty(duty);
-//	}
-//
-//	@RequestMapping(value = "/onduty/findall", method = RequestMethod.POST)
-//	public List<OnDutyDto> listDutyAll() {
-//		return onDutyManger.listDutyAll();
-//	}
-//
-//	@RequestMapping(value = "/readfile", method = RequestMethod.POST)
-//	public DutyStatus readFile(@RequestParam(value="uploadFile")MultipartFile file) throws Exception{
-//		DutyStatus status = onDutyManger.readFile(file);
-//		return status;
-//	}
-//
-//	@RequestMapping(value = "/importfile", method = RequestMethod.POST)
-//	public DutyStatus importFile(@RequestBody List<DutyImportDto> importList) throws IOException{
-//		DutyStatus status = onDutyManger.importFile(importList);
-//		return status;
-//	}
-	      
+	@RequestMapping(value = "/duty", method = RequestMethod.POST)
+	public @ResponseBody DutyDto saveOrUpdate(@RequestBody DutyDto duty) {
+		return onDutyManger.saveOrUpdate(duty);
+	}
+
+	@RequestMapping(value = "/duty/{id}", method = RequestMethod.POST)
+	public void delete(@PathVariable String id) {
+		onDutyManger.delete(id);
+	}
+	@RequestMapping(value = "/duty/{id}", method = RequestMethod.GET)
+	public @ResponseBody DutyDto find(@PathVariable String id) {
+		return onDutyManger.find(id);
+	}
+
+	@RequestMapping(value = "/import", method = RequestMethod.POST)
+	public void importDate(MultipartFile file){
+		InputStream ins=null;
+		try {
+			ins=file.getInputStream();
+			onDutyManger.importData(ins,file.getOriginalFilename());
+		} catch (IOException e) {
+			throw new SocialSystemException(312,file.getOriginalFilename());
+		}finally {
+			if(ins!=null){
+				try {
+					ins.close();
+				} catch (IOException e) {
+					throw new SocialSystemException(312,file.getOriginalFilename());
+				}
+			}
+		}
+
+	}
 
 }

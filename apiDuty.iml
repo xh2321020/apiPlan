@@ -111,5 +111,7 @@
     <orderEntry type="library" name="Maven: org.apache.xmlbeans:xmlbeans:2.3.0" level="project" />
     <orderEntry type="library" name="Maven: stax:stax-api:1.0.1" level="project" />
     <orderEntry type="library" name="Maven: xml-apis:xml-apis:1.0.b2" level="project" />
+    <orderEntry type="library" name="Maven: commons-io:commons-io:2.5" level="project" />
+    <orderEntry type="library" name="Maven: mysql:mysql-connector-java:5.1.38" level="project" />
   </component>
 </module>
