@@ -84,7 +84,7 @@ public class OnPlanController {
 	public @ResponseBody PlanDetailDto Editplandetail(@RequestBody PlanDetailDto plandetail) {
 		return onPlanManger.editplandetail(plandetail);
 	}
-	@RequestMapping(value = "/Deleteplandetail", method = RequestMethod.GET)  //删除计划任务项
+	@RequestMapping(value = "/Deleteplandetail/{id}", method = RequestMethod.GET)  //删除计划任务项------------------
 	public void Deleteplandetail(@RequestParam String id) {
 		onPlanManger.delplandetail(id);
 	}
@@ -114,5 +114,9 @@ public class OnPlanController {
 	public @ResponseBody List<PlanModifyDto> Modifyloglist(@PathVariable String id) {
 		return onPlanManger.modifyloglist(id);
 	}
-
+	
+//	@RequestMapping(value = "/savelog/{id}", method = RequestMethod.POST)   //计划列表
+//	public @ResponseBody PlanModifyDto savelog(@RequestBody PlanModifyDto pmd) {
+//		return onPlanManger.savelog(pmd);
+//	}
 }

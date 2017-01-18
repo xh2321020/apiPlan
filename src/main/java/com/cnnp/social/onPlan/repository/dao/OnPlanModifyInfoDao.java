@@ -10,7 +10,7 @@ import com.cnnp.social.onPlan.repository.entity.PlanModifyInfo;
 
 
 @Transactional
-public interface OnModifyInfoDao extends CrudRepository<PlanModifyInfo, String> ,JpaSpecificationExecutor<PlanModifyInfo>{
+public interface OnPlanModifyInfoDao extends CrudRepository<PlanModifyInfo, String> ,JpaSpecificationExecutor<PlanModifyInfo>{
 
 	
 	@Query("select count(*) from PlanModifyInfo ")

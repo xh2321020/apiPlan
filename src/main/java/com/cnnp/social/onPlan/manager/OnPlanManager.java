@@ -23,7 +23,7 @@ import com.cnnp.social.onPlan.manager.dto.PlanDetailDto;
 import com.cnnp.social.onPlan.manager.dto.PlanDetailSubDto;
 import com.cnnp.social.onPlan.manager.dto.PlanDto;
 import com.cnnp.social.onPlan.manager.dto.PlanModifyDto;
-import com.cnnp.social.onPlan.repository.dao.OnModifyInfoDao;
+import com.cnnp.social.onPlan.repository.dao.OnPlanModifyInfoDao;
 import com.cnnp.social.onPlan.repository.dao.OnPlanDao;
 import com.cnnp.social.onPlan.repository.dao.OnPlanDetailDao;
 import com.cnnp.social.onPlan.repository.dao.OnPlanDetailSubDao;
@@ -36,16 +36,18 @@ import com.cnnp.social.onPlan.repository.entity.PlanModifyInfo;
 @Component
 
 public class OnPlanManager {
+	
 	private final Logger logger = LoggerFactory.getLogger(this.getClass());
 	@Autowired
 	private JdbcTemplate jdbcTemplate;
 	@Autowired
 	private OnPlanDao onPlanDao;
+	@Autowired
 	private OnPlanDetailDao onPlanDetailDao;
+	@Autowired
 	private OnPlanDetailSubDao onPlanDetailSubDao;
-	private OnModifyInfoDao onModifyInfoDao;
-	// @Autowired
-	// private OnDutyImportDao onDutyImportDao;
+	@Autowired
+	private OnPlanModifyInfoDao onModifyInfoDao;
 
 	private DozerBeanMapper mapper = new DozerBeanMapper();
 
@@ -94,10 +96,9 @@ public class OnPlanManager {
 		if (entity == null) {
 			throw new SocialSystemException(311);// Save Exception
 		}
-		modifylog("","add",entity.getParentid(),""); //用户，描述 怎么写？
-		
 		PlanDto newPlan = new PlanDto();
 		mapper.map(entity, newPlan);
+		modifylog("","add",newPlan.getId(),""); //用户，描述 怎么写？
 		return newPlan;
 	}
 
@@ -112,11 +113,10 @@ public class OnPlanManager {
 		entity = onPlanDao.save(entity);
 		if (entity == null) {
 			throw new SocialSystemException(311);// Save Exception
-		}
-		modifylog("","edit",entity.getParentid(),""); //用户，描述 怎么写？
-		
+		}		
 		PlanDto newPlan = new PlanDto();
 		mapper.map(entity, newPlan);
+		modifylog("","edit",newPlan.getId(),""); //用户，描述 怎么写？
 		return newPlan;
 	}
 	
@@ -133,9 +133,9 @@ public class OnPlanManager {
 		if (entity == null) {
 			throw new SocialSystemException(311);// Save Exception
 		}
-		modifylog("","cancel",entity.getParentid(),""); //用户，描述 怎么写？
 		PlanDto newPlan = new PlanDto();
 		mapper.map(entity, newPlan);
+		modifylog("","cancel",newPlan.getId(),""); //用户，描述 怎么写？
 		return newPlan;
 	}
 	
@@ -152,9 +152,9 @@ public class OnPlanManager {
 		if (entity == null) {
 			throw new SocialSystemException(311);// Save Exception
 		}
-		modifylog("","freezing",entity.getParentid(),""); //用户，描述 怎么写？
 		PlanDto newPlan = new PlanDto();
 		mapper.map(entity, newPlan);
+		modifylog("","freezing",newPlan.getId(),""); //用户，描述 怎么写？
 		return newPlan;
 	}
 	
@@ -171,9 +171,9 @@ public class OnPlanManager {
 		if (entity == null) {
 			throw new SocialSystemException(311);// Save Exception
 		}
-		modifylog("","thawing",entity.getParentid(),""); //用户，描述 怎么写？
 		PlanDto newPlan = new PlanDto();
 		mapper.map(entity, newPlan);
+		modifylog("","thawing",newPlan.getId(),""); //用户，描述 怎么写？
 		return newPlan;
 	}
 	
@@ -191,9 +191,9 @@ public class OnPlanManager {
 		if (entity == null) {
 			throw new SocialSystemException(311);// Save Exception
 		}
-		modifylog("","start",entity.getParentid(),""); //用户，描述 怎么写？
 		PlanDto newPlan = new PlanDto();
 		mapper.map(entity, newPlan);
+		modifylog("","start",newPlan.getId(),""); //用户，描述 怎么写？
 		return newPlan;
 	}
 	
@@ -211,9 +211,9 @@ public class OnPlanManager {
 		if (entity == null) {
 			throw new SocialSystemException(311);// Save Exception
 		}
-		modifylog("","finish",entity.getParentid(),""); //用户，描述 怎么写？
 		PlanDto newPlan = new PlanDto();
 		mapper.map(entity, newPlan);
+		modifylog("","finish",newPlan.getId(),""); //用户，描述 怎么写？
 		return newPlan;
 	}
 	
@@ -381,13 +381,15 @@ public class OnPlanManager {
 		return modifylist;
 	}
 	public void modifylog(String username,String modifytype,String planid,String descript){
-		PlanModifyInfo pmi = new PlanModifyInfo();
-		pmi.setOperatordate(new Date());
-		pmi.setOperatorid(username);//用户明？？？
-		pmi.setOperatortype(modifytype);
-		pmi.setPlanid(planid);
-		pmi.setDescription(descript);//描述
-		onModifyInfoDao.save(pmi);
-	}
-	
+		PlanModifyInfo entity = new PlanModifyInfo();
+		entity.setOperatordate(new Date());
+		entity.setOperatorid(username);//用户明？？？
+		entity.setOperatortype(modifytype);
+		entity.setPlanid(planid);
+		entity.setDescription(descript);//描述
+		entity = onModifyInfoDao.save(entity);
+		if (entity == null) {
+			throw new SocialSystemException(311);// Save Exception
+		}
+	}	
 }
