@@ -23,7 +23,7 @@ public class Application {
 //    @Override
 //    protected SpringApplicationBuilder configure(SpringApplicationBuilder application) {
 //        return application.sources(Application.class);
-//    }
+//    } 
 //	@Bean
 //	public UndertowEmbeddedServletContainerFactory embeddedServletContainerFactory() {
 //	    UndertowEmbeddedServletContainerFactory factory = new UndertowEmbeddedServletContainerFactory();

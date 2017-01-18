@@ -1,4 +1,4 @@
-package com.cnnp.social.onDuty.manager.dto;
+package com.cnnp.social.onPlan.manager.dto;
 
 public class DutyImportDto {
 	
