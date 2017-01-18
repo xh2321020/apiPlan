@@ -114,49 +114,5 @@ public class OnPlanController {
 	public @ResponseBody List<PlanModifyDto> Modifyloglist(@PathVariable String id) {
 		return onPlanManger.modifyloglist(id);
 	}
-	
-	
-//	@RequestMapping(value = "/homepageform/del", method = RequestMethod.GET)
-//	public void del(@RequestParam long formid) {
-//		hpManger.delForm(formid);
-//	}
-	
-	
-	
-//	@RequestMapping(value = "/duties", method = RequestMethod.POST)
-//	public @ResponseBody List<DutyDto> findByDuty(@RequestBody DutyQueryDto duty) {
-//		return onPlanManger.findAvailableDuty(duty);
-//	}
-//
-
-//
-//	@RequestMapping(value = "/duty/{id}", method = RequestMethod.POST)
-//	public void delete(@PathVariable String id) {
-//		onPlanManger.delete(id);
-//	}
-//	@RequestMapping(value = "/duty/{id}", method = RequestMethod.GET)
-//	public @ResponseBody DutyDto find(@PathVariable String id) {
-//		return onPlanManger.find(id);
-//	}
-//
-//	@RequestMapping(value = "/import", method = RequestMethod.POST)
-//	public void importDate(MultipartFile file){
-//		InputStream ins=null;
-//		try {
-//			ins=file.getInputStream();
-//			onPlanManger.importData(ins,file.getOriginalFilename());
-//		} catch (IOException e) {
-//			throw new SocialSystemException(312,file.getOriginalFilename());
-//		}finally {
-//			if(ins!=null){
-//				try {
-//					ins.close();
-//				} catch (IOException e) {
-//					throw new SocialSystemException(312,file.getOriginalFilename());
-//				}
-//			}
-//		}
-//
-
 
 }
