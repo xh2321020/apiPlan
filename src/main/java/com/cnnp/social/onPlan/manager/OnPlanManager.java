@@ -280,7 +280,7 @@ public class OnPlanManager {
 		return newPlanDetail;
 	}
 	
-	public void delplandetail(String id) {  //删除计划项
+	public String delplandetail(String id) {  //删除计划项
 		if (StringUtils.isEmpty(id)) {
 			throw new IllegalArgumentException("bad request parameter");
 		}
@@ -289,6 +289,7 @@ public class OnPlanManager {
 			throw new NoContentException(310); // No Content Exception
 		}
 		onPlanDetailDao.delete(id);
+		return "true";
 	}
 	
 	//==============================子计划项====================================
@@ -354,7 +355,7 @@ public class OnPlanManager {
 		return newPlanDetailsub;
 	}
 	
-	public void delplandetailsub(String id) {  //删除子计划
+	public String delplandetailsub(String id) {  //删除子计划
 		if (StringUtils.isEmpty(id)) {
 			throw new IllegalArgumentException("bad request parameter");
 		}
@@ -363,6 +364,7 @@ public class OnPlanManager {
 			throw new NoContentException(310); // No Content Exception
 		}
 		onPlanDetailSubDao.delete(id);
+		return "true";
 	}
 	//===========================日志=======================================
 	
@@ -391,5 +393,11 @@ public class OnPlanManager {
 		if (entity == null) {
 			throw new SocialSystemException(311);// Save Exception
 		}
-	}	
+	}
+	//==========================导出========================================
+	public String explorerplan(String id){
+		
+		return "excelname";
+		
+	}
 }

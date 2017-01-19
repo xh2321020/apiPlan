@@ -85,8 +85,8 @@ public class OnPlanController {
 		return onPlanManger.editplandetail(plandetail);
 	}
 	@RequestMapping(value = "/Deleteplandetail/{id}", method = RequestMethod.GET)  //删除计划任务项------------------
-	public void Deleteplandetail(@RequestParam String id) {
-		onPlanManger.delplandetail(id);
+	public String Deleteplandetail(@RequestParam String id) {
+		return onPlanManger.delplandetail(id);
 	}
     //========================计划子任务项========================================
 	@RequestMapping(value = "/PlanDetaiSublist/{id}", method = RequestMethod.GET)   //子任务项列表
@@ -106,8 +106,8 @@ public class OnPlanController {
 		return onPlanManger.editplandetailsub(plandetailsub);
 	}
 	@RequestMapping(value = "/Deleteplandetailsub", method = RequestMethod.GET)  //删除计划任务项
-	public void Deleteplandetailsub(@RequestParam String id) {
-		onPlanManger.delplandetailsub(id);
+	public String Deleteplandetailsub(@RequestParam String id) {
+		return onPlanManger.delplandetailsub(id);
 	}
 	//==================================修改日志============================================
 	@RequestMapping(value = "/ModifyLoglist/{id}", method = RequestMethod.GET)   //日志列表
@@ -115,8 +115,9 @@ public class OnPlanController {
 		return onPlanManger.modifyloglist(id);
 	}
 	
-//	@RequestMapping(value = "/savelog/{id}", method = RequestMethod.POST)   //计划列表
-//	public @ResponseBody PlanModifyDto savelog(@RequestBody PlanModifyDto pmd) {
-//		return onPlanManger.savelog(pmd);
-//	}
+	//==================================导出================================================Explorerplan
+	@RequestMapping(value = "/Explorerplan/{id}", method = RequestMethod.GET)   //日志列表
+	public String Explorerplan(@PathVariable String id) {
+		return onPlanManger.explorerplan(id);
+	}
 }
