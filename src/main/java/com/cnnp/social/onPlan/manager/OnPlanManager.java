@@ -280,7 +280,7 @@ public class OnPlanManager {
 		return newPlanDetail;
 	}
 	
-	public String delplandetail(String id) {  //删除计划项
+	public void delplandetail(String id) {  //删除计划项
 		if (StringUtils.isEmpty(id)) {
 			throw new IllegalArgumentException("bad request parameter");
 		}
@@ -289,7 +289,6 @@ public class OnPlanManager {
 			throw new NoContentException(310); // No Content Exception
 		}
 		onPlanDetailDao.delete(id);
-		return "true";
 	}
 	
 	//==============================子计划项====================================

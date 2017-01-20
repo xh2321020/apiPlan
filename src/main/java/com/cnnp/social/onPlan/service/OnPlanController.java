@@ -1,22 +1,21 @@
 package com.cnnp.social.onPlan.service;
 
-import com.cnnp.social.base.SocialSystemException;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.cnnp.social.onPlan.manager.OnPlanManager;
 import com.cnnp.social.onPlan.manager.dto.PlanDetailDto;
 import com.cnnp.social.onPlan.manager.dto.PlanDetailSubDto;
 import com.cnnp.social.onPlan.manager.dto.PlanDto;
 import com.cnnp.social.onPlan.manager.dto.PlanModifyDto;
-import com.cnnp.social.onPlan.manager.dto.PlanQueryDto;
-import com.cnnp.social.onPlan.repository.entity.PlanInfo;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1.0")
@@ -85,8 +84,8 @@ public class OnPlanController {
 		return onPlanManger.editplandetail(plandetail);
 	}
 	@RequestMapping(value = "/Deleteplandetail/{id}", method = RequestMethod.GET)  //删除计划任务项------------------
-	public String Deleteplandetail(@RequestParam String id) {
-		return onPlanManger.delplandetail(id);
+	public void Deleteplandetail(@RequestParam String id) {
+		onPlanManger.delplandetail(id);
 	}
     //========================计划子任务项========================================
 	@RequestMapping(value = "/PlanDetaiSublist/{id}", method = RequestMethod.GET)   //子任务项列表
@@ -97,15 +96,15 @@ public class OnPlanController {
 	public @ResponseBody PlanDetailSubDto findplanDetalsub(@PathVariable String id) {
 		return onPlanManger.findplandetailsub(id);
 	}
-	@RequestMapping(value = "/Addplandetailsub", method = RequestMethod.POST)  //添加计划任务项
+	@RequestMapping(value = "/Addplandetailsub", method = RequestMethod.POST)  //添加子任务项
 	public @ResponseBody PlanDetailSubDto Addplandetailsub(@RequestBody PlanDetailSubDto plandetailsub) {
 		return onPlanManger.addplandetailsub(plandetailsub);
 	}
-	@RequestMapping(value = "/Editplandetailsub", method = RequestMethod.POST)  //编辑计划任务项
+	@RequestMapping(value = "/Editplandetailsub", method = RequestMethod.POST)  //编辑子任务项
 	public @ResponseBody PlanDetailSubDto Editplandetailsub(@RequestBody PlanDetailSubDto plandetailsub) {
 		return onPlanManger.editplandetailsub(plandetailsub);
 	}
-	@RequestMapping(value = "/Deleteplandetailsub", method = RequestMethod.GET)  //删除计划任务项
+	@RequestMapping(value = "/Deleteplandetailsub/{id}", method = RequestMethod.GET)  //删除子任务项
 	public String Deleteplandetailsub(@RequestParam String id) {
 		return onPlanManger.delplandetailsub(id);
 	}
